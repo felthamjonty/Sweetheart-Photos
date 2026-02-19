@@ -1,67 +1,97 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <string>
+#include <algorithm>
+#include <filesystem>
 
 int main(int argc, char* argv[]){
-    if (argc < 2){
-        std::cout << "Usage: image-viewer.exe <path-to-image>" << std::endl;
-        return 0;
+    sf::RenderWindow window(sf::VideoMode({171, 258}), "Photograph", sf::Style::None);
+    window.setFramerateLimit(60);
+    
+    std::string parentFolder = std::filesystem::path(argv[0]).parent_path().string();
+    
+    sf::Image icon;
+    if (icon.loadFromFile(parentFolder+"/image/icon.png")){
+        window.setIcon({icon.getSize().x, icon.getSize().y}, icon.getPixelsPtr());
     }
-
-    std::string imagePath = argv[1];
-
-    sf::Texture texture;
-    if (!texture.loadFromFile(imagePath )){
-        std::cout<<"Image failed to load\n";
+    
+    sf::Texture bgImage;
+    if (!bgImage.loadFromFile(parentFolder+"/image/photo.png")){
+        std::cout<<"UI failed to load\n";
         return 1;
     }
 
-    sf::Sprite sprite(texture);
+    sf::Font font;
+    if (!font.openFromFile(parentFolder+"/font/Marker-Regular.otf")){
+        std::cout << "Could not load font!" << std::endl;
+        return 1;
+    }
 
-    sf::RenderWindow window(sf::VideoMode({800, 600}), "Title");
+    sf::Sprite bgSprite(bgImage);
 
-    float imgW = static_cast<float>(texture.getSize().x);
-    float imgH = static_cast<float>(texture.getSize().y);
-    float winW = static_cast<float>(window.getSize().x);
-    float winH = static_cast<float>(window.getSize().y);
-    float scale = std::min(winW / imgW, winH / imgH);
-    
-    sprite.setOrigin({imgW/2.f,imgH/2.f});
-    sprite.setScale({scale,scale});
-    sprite.setPosition({winW/2.f,winH/2.f});
+    if (argc >= 2){
+        std::string imagePath = argv[1];
 
-    while (window.isOpen()){
-        while (auto event = window.pollEvent()){
-            if (event->is<sf::Event::Closed>()){
-                window.close();
+        sf::Texture texture;
+        if (!texture.loadFromFile(imagePath )){
+            std::cout<<"Image failed to load\n";
+            return 1;
+        }
+        sf::Sprite sprite(texture);
+
+        sprite.setScale({151.f/texture.getSize().x,198.f/texture.getSize().y});
+        sprite.setPosition({10.f,15.f});
+
+        std::string textS = argv[1];
+        bool stringStart=true;
+        std::string correctedText ="";
+        for (int i = textS.length()-1; i >= 0; i--){
+            if (textS[i]=='\\'||textS[i]=='/'){
+                stringStart=i;
+                break;
             }
-
-            if (const auto* resized = event->getIf<sf::Event::Resized>())
-            {
-                sf::FloatRect visibleArea({0, 0},
-                {static_cast<float>(resized->size.x),
-                static_cast<float>(resized->size.y)});
-                window.setView(sf::View(visibleArea));
-
-                float imgW = static_cast<float>(texture.getSize().x);
-                float imgH = static_cast<float>(texture.getSize().y);
-                float winW = static_cast<float>(window.getSize().x);
-                float winH = static_cast<float>(window.getSize().y);
-                float scale = std::min(winW / imgW, winH / imgH);
-                
-                sprite.setOrigin({imgW/2.f,imgH/2.f});
-                sprite.setScale({scale,scale});
-                sprite.setPosition({winW/2.f,winH/2.f});
-                
+            if(stringStart&&textS[i]=='.'){
+                stringStart=false;
+            }else if(!stringStart){
+                correctedText=textS[i]+correctedText;
             }
         }
 
-        window.clear(sf::Color(0,0,0));
+        transform(correctedText.begin(), correctedText.end(), correctedText.begin(), ::toupper);
 
-        window.draw(sprite);
+        sf::Text text(font);
+        text.setString(correctedText);
+        text.setCharacterSize(12);
+        text.setFillColor(sf::Color::Black);
+        text.setOrigin({text.getLocalBounds().position.x+text.getLocalBounds().size.x/2,text.getLocalBounds().position.y+text.getLocalBounds().size.y/2});
+        text.setPosition({85.f, 235.f});
 
-        window.display();
+        while (window.isOpen()){
+            while (auto event = window.pollEvent()){
+                if (event->is<sf::Event::Closed>())window.close();
+            }
+
+            window.clear(sf::Color::Black);
+
+            window.draw(bgSprite);
+            window.draw(text);
+            window.draw(sprite);
+
+            window.display();
+        }
+
+        return 0;
+    }else{
+        while (window.isOpen()){
+            while (auto event = window.pollEvent()){
+                if (event->is<sf::Event::Closed>())window.close();
+            }
+
+            window.clear(sf::Color::Black);
+            window.draw(bgSprite);
+            window.display();
+        }
+
+        return 0;
     }
-
-    return 0;
 }
