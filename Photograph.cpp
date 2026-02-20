@@ -198,6 +198,13 @@ int main(int argc, char* argv[]){
             window.draw(bgSprite);
             window.draw(text);
             window.draw(sprite);
+            if (menuOpen){
+                window.draw(rectangle);
+                window.draw(rectangleTop);
+                window.draw(textTop);
+                window.draw(textBottom);
+                window.draw(textExit);
+            }
 
             window.display();
         }
