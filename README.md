@@ -1,19 +1,17 @@
-A simple image viewer made in C++
+## A simple image viewer made in C++
  
  
-Features:
+### Features:
 
--Supports most image types (png,jpeg,jfif,ect) including gifs, but animations are not supported
+- Supports most image types (png,jpeg,jfif,ect) including gifs, but animations are not supported
 
--Transparent image support
+- Transparent image support
 
--Option to stay above all windows
+- Option to stay above all windows
+</br>
 
-
-Usage:
-
-Just drag a photo into the exe file or "open with" on an image and select the exe
-
+### Usage:
+Just drag a photo into the .exe file or "open with" on an image and select the .exe
 
 Drag left mouse to move
 
